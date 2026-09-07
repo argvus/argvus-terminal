@@ -1,0 +1,45 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    name: Validate package sources
+    runs-on: ubuntu-latest
+    container: archlinux:latest
+
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install validation tools
+        run: |
+          pacman -Syu --noconfirm --needed base-devel desktop-file-utils git shellcheck sudo
+
+      - name: Validate repository
+        shell: bash
+        run: |
+          set -euo pipefail
+          make validate
+
+      - name: Validate CI PKGBUILD
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd "packaging/arch"
+          makepkg -p PKGBUILD --printsrcinfo >/dev/null
+
+      - name: Validate local PKGBUILD
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -f "packaging/arch/PKGBUILD.local"

@@ -1,0 +1,14 @@
+[Desktop Entry]
+Type=Application
+Name=ARGVUS Terminal
+Name[pt_BR]=Terminal ARGVUS
+GenericName=Terminal Emulator
+GenericName[pt_BR]=Emulador de terminal
+Comment=Kitty terminal configured for ARGVUS
+Comment[pt_BR]=Terminal Kitty configurado para o ARGVUS
+Icon=utilities-terminal
+Exec=argvus-terminal
+Terminal=false
+Categories=System;TerminalEmulator;
+Keywords=terminal;kitty;argvus;shell;
+StartupNotify=false

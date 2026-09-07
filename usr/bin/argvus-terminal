@@ -1,0 +1,272 @@
+#!/usr/bin/env sh
+# Launch the official Kitty terminal with ARGVUS runtime configuration.
+
+set -eu
+
+SYSTEM_ROOT="${ARGVUS_TERMINAL_SYSTEM_CONFIG:-/usr/share/argvus-terminal}"
+DEFAULT_THEME="argvus-dark-aether"
+DEFAULT_ACCENT="#3590bd"
+
+ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/scripts/argvus/bootstrap.sh}"
+if [ -r "$ARGVUS_BOOTSTRAP" ]; then
+  # shellcheck disable=SC1090,SC1091
+  . "$ARGVUS_BOOTSTRAP"
+else
+  : "${HOME:?HOME is not set}"
+  ARGVUS_CONFIG_HOME="${ARGVUS_CONFIG_HOME:-${XDG_CONFIG_HOME:-$HOME/.config}}"
+  ARGVUS_CACHE_HOME="${ARGVUS_CACHE_HOME:-${XDG_CACHE_HOME:-$HOME/.cache}/argvus}"
+  paths_cache() { printf '%s\n' "${ARGVUS_CACHE_HOME}/${1}"; }
+fi
+
+usage() {
+  cat <<'EOF'
+Usage:
+  argvus-terminal [kitty options]
+  argvus-terminal --apply [theme]
+  argvus-terminal --print-config [theme]
+  argvus-terminal --print-tui-config [theme]
+
+Options:
+  --class <class>              Set Kitty window class.
+  --font-profile <profile>     terminal or apps.
+  --tui                        Use the ARGVUS TUI Kitty profile.
+  -e <command> [args...]       Execute a command in Kitty.
+EOF
+}
+
+die() {
+  printf 'argvus-terminal: %s\n' "$*" >&2
+  exit 1
+}
+
+read_first_line() {
+  _file="$1"
+  _fallback="$2"
+  if [ -s "$_file" ]; then
+    sed -n '1p' "$_file"
+  else
+    printf '%s\n' "$_fallback"
+  fi
+}
+
+read_active_theme() {
+  read_first_line "${ARGVUS_CONFIG_HOME}/argvus/.active-theme" "$DEFAULT_THEME"
+}
+
+theme_default_accent() {
+  case "$1" in
+    argvus-dark-aether|argvus-dark-aether-float) printf '#3590bd\n' ;;
+    argvus-dark-silver|argvus-dark-silver-float) printf '#595959\n' ;;
+    argvus-light-veil|argvus-light-veil-float) printf '#181818\n' ;;
+    argvus-dark-slate|argvus-dark-slate-float) printf '#7391a5\n' ;;
+    argvus-dark-universe|argvus-dark-universe-float) printf '#eeeeee\n' ;;
+    *) printf '%s\n' "$DEFAULT_ACCENT" ;;
+  esac
+}
+
+read_accent() {
+  _theme="$1"
+  _fallback="$(theme_default_accent "$_theme")"
+  read_first_line "${ARGVUS_CONFIG_HOME}/argvus/.accent-color" "$_fallback"
+}
+
+font_state_value() {
+  _key="$1"
+  _fallback="$2"
+  _fonts_file="${ARGVUS_CONFIG_HOME}/argvus/fonts.conf"
+  if [ -f "$_fonts_file" ]; then
+    _value="$(sed -n "s|^${_key}=||p" "$_fonts_file" | head -n1)"
+    [ -n "$_value" ] && { printf '%s\n' "$_value"; return 0; }
+  fi
+  printf '%s\n' "$_fallback"
+}
+
+font_family() {
+  case "$1" in
+    apps) font_state_value apps_family "$(font_state_value default_family "Terminus (TTF)")" ;;
+    *) font_state_value terminal_family "$(font_state_value monospace_family "JetBrainsMono Nerd Font")" ;;
+  esac
+}
+
+font_size() {
+  case "$1" in
+    apps) font_state_value apps_size "$(font_state_value default_size 13)" ;;
+    *) font_state_value terminal_size "$(font_state_value monospace_size 13)" ;;
+  esac
+}
+
+theme_file() {
+  _theme="$1"
+  for _file in \
+    "${ARGVUS_CONFIG_HOME}/argvus/terminal/kitty/themes/${_theme}/theme.conf" \
+    "${SYSTEM_ROOT}/kitty/themes/${_theme}/theme.conf"; do
+    [ -f "$_file" ] && { printf '%s\n' "$_file"; return 0; }
+  done
+  printf '%s\n' "${SYSTEM_ROOT}/kitty/themes/${DEFAULT_THEME}/theme.conf"
+}
+
+base_config() {
+  for _file in \
+    "${ARGVUS_CONFIG_HOME}/argvus/terminal/kitty/kitty.conf" \
+    "${SYSTEM_ROOT}/kitty/kitty.conf"; do
+    [ -f "$_file" ] && { printf '%s\n' "$_file"; return 0; }
+  done
+  die "Kitty config not found under ${SYSTEM_ROOT}/kitty"
+}
+
+tui_config() {
+  for _file in \
+    "${ARGVUS_CONFIG_HOME}/argvus/terminal/kitty-tui/kitty.conf" \
+    "${SYSTEM_ROOT}/kitty-tui/kitty.conf"; do
+    [ -f "$_file" ] && { printf '%s\n' "$_file"; return 0; }
+  done
+  die "Kitty TUI config not found under ${SYSTEM_ROOT}/kitty-tui"
+}
+
+runtime_base_config() {
+  _theme="${1:-$(read_active_theme)}"
+  _profile="${2:-terminal}"
+  _src="$(base_config)"
+  case "$_profile" in
+    terminal) _dst="$(paths_cache argvus-terminal/kitty.conf)" ;;
+    *) _dst="$(paths_cache "argvus-terminal/kitty-${_profile}.conf")" ;;
+  esac
+  _theme_file="$(theme_file "$_theme")"
+  _family="$(font_family "$_profile")"
+  _size="$(font_size "$_profile")"
+  _accent="$(read_accent "$_theme")"
+
+  mkdir -p "${_dst%/*}"
+  awk \
+    -v theme_file="$_theme_file" \
+    -v family="$_family" \
+    -v size="${_size}.0" \
+    -v accent="$_accent" '
+      /^[[:space:]]*include[[:space:]].*\/kitty\/themes\/.*\/theme\.conf[[:space:]]*$/ { print "include " theme_file; next }
+      /^[[:space:]]*font_family[[:space:]]+/ { print "font_family      " family; next }
+      /^[[:space:]]*font_size[[:space:]]+/ { print "font_size        " size; next }
+      { print }
+      END { print ""; print "# Runtime ARGVUS accent override"; print "active_tab_foreground   " accent }
+    ' "$_src" > "$_dst"
+  printf '%s\n' "$_dst"
+}
+
+runtime_tui_config() {
+  _theme="${1:-$(read_active_theme)}"
+  _profile="${2:-terminal}"
+  _src="$(tui_config)"
+  _base="$(runtime_base_config "$_theme" "$_profile")"
+  case "$_profile" in
+    terminal) _dst="$(paths_cache argvus-terminal/kitty-tui.conf)" ;;
+    *) _dst="$(paths_cache "argvus-terminal/kitty-tui-${_profile}.conf")" ;;
+  esac
+  _family="$(font_family "$_profile")"
+  _size="$(font_size "$_profile")"
+
+  mkdir -p "${_dst%/*}"
+  awk \
+    -v base="$_base" \
+    -v family="$_family" \
+    -v size="${_size}.0" '
+      /^[[:space:]]*include[[:space:]]+/ { print "include " base; next }
+      /^[[:space:]]*font_family[[:space:]]+/ { print "font_family      " family; next }
+      /^[[:space:]]*font_size[[:space:]]+/ { print "font_size        " size; next }
+      { print }
+    ' "$_src" > "$_dst"
+  printf '%s\n' "$_dst"
+}
+
+mode="launch"
+theme=""
+class="kitty"
+font_profile="terminal"
+use_tui=0
+
+case "${1:-}" in
+  --help|-h)
+    usage
+    exit 0
+    ;;
+  --apply)
+    mode="apply"
+    shift
+    theme="${1:-}"
+    ;;
+  --print-config)
+    mode="print-config"
+    shift
+    theme="${1:-}"
+    ;;
+  --print-tui-config)
+    mode="print-tui-config"
+    shift
+    theme="${1:-}"
+    ;;
+esac
+
+if [ "$mode" = "apply" ]; then
+  theme="${theme:-$(read_active_theme)}"
+  runtime_base_config "$theme" terminal >/dev/null
+  runtime_tui_config "$theme" terminal >/dev/null
+  runtime_tui_config "$theme" apps >/dev/null
+  exit 0
+fi
+
+if [ "$mode" = "print-config" ]; then
+  runtime_base_config "${theme:-$(read_active_theme)}" "$font_profile"
+  exit 0
+fi
+
+if [ "$mode" = "print-tui-config" ]; then
+  runtime_tui_config "${theme:-$(read_active_theme)}" "$font_profile"
+  exit 0
+fi
+
+while [ "$#" -gt 0 ]; do
+  case "$1" in
+    --class)
+      [ "$#" -ge 2 ] || die "--class requires a value"
+      class="$2"
+      shift 2
+      ;;
+    --class=*)
+      class="${1#--class=}"
+      shift
+      ;;
+    --font-profile)
+      [ "$#" -ge 2 ] || die "--font-profile requires a value"
+      font_profile="$2"
+      shift 2
+      ;;
+    --font-profile=*)
+      font_profile="${1#--font-profile=}"
+      shift
+      ;;
+    --tui)
+      use_tui=1
+      shift
+      ;;
+    --)
+      shift
+      break
+      ;;
+    *)
+      break
+      ;;
+  esac
+done
+
+case "$font_profile" in
+  terminal|apps) ;;
+  *) die "unsupported font profile: $font_profile" ;;
+esac
+
+command -v kitty >/dev/null 2>&1 || die "kitty is not installed"
+
+if [ "$use_tui" -eq 1 ]; then
+  config="$(runtime_tui_config "$(read_active_theme)" "$font_profile")"
+else
+  config="$(runtime_base_config "$(read_active_theme)" "$font_profile")"
+fi
+
+exec kitty --class "$class" --config "$config" "$@"
