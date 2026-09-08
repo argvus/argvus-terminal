@@ -83,14 +83,14 @@ font_state_value() {
 
 font_family() {
   case "$1" in
-    apps) font_state_value apps_family "$(font_state_value default_family "Terminus (TTF)")" ;;
-    *) font_state_value terminal_family "$(font_state_value monospace_family "JetBrainsMono Nerd Font")" ;;
+    apps) font_state_value apps_family "$(font_state_value default_family "IBM Plex Mono")" ;;
+    *) font_state_value terminal_family "$(font_state_value monospace_family "IBM Plex Mono")" ;;
   esac
 }
 
 font_size() {
   case "$1" in
-    apps) font_state_value apps_size "$(font_state_value default_size 13)" ;;
+    apps) font_state_value apps_size "$(font_state_value default_size 12)" ;;
     *) font_state_value terminal_size "$(font_state_value monospace_size 13)" ;;
   esac
 }
