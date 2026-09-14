@@ -3,11 +3,11 @@
 
 set -eu
 
-SYSTEM_ROOT="${ARGVUS_TERMINAL_SYSTEM_CONFIG:-/usr/share/argvus-terminal}"
+SYSTEM_ROOT="${ARGVUS_TERMINAL_SYSTEM_CONFIG:-/usr/share/argvus/terminal}"
 DEFAULT_THEME="argvus-dark-aether"
 DEFAULT_ACCENT="#3590bd"
 
-ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/scripts/argvus/bootstrap.sh}"
+ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/session/sh/bootstrap.sh}"
 if [ -r "$ARGVUS_BOOTSTRAP" ]; then
   # shellcheck disable=SC1090,SC1091
   . "$ARGVUS_BOOTSTRAP"
@@ -99,28 +99,28 @@ theme_file() {
   _theme="$1"
   for _file in \
     "${ARGVUS_CONFIG_HOME}/argvus/terminal/kitty/themes/${_theme}/theme.conf" \
-    "${SYSTEM_ROOT}/kitty/themes/${_theme}/theme.conf"; do
+    "${SYSTEM_ROOT}/config/themes/${_theme}/theme.conf"; do
     [ -f "$_file" ] && { printf '%s\n' "$_file"; return 0; }
   done
-  printf '%s\n' "${SYSTEM_ROOT}/kitty/themes/${DEFAULT_THEME}/theme.conf"
+  printf '%s\n' "${SYSTEM_ROOT}/config/themes/${DEFAULT_THEME}/theme.conf"
 }
 
 base_config() {
   for _file in \
     "${ARGVUS_CONFIG_HOME}/argvus/terminal/kitty/kitty.conf" \
-    "${SYSTEM_ROOT}/kitty/kitty.conf"; do
+    "${SYSTEM_ROOT}/config/kitty.conf"; do
     [ -f "$_file" ] && { printf '%s\n' "$_file"; return 0; }
   done
-  die "Kitty config not found under ${SYSTEM_ROOT}/kitty"
+  die "Kitty config not found under ${SYSTEM_ROOT}/config"
 }
 
 tui_config() {
   for _file in \
     "${ARGVUS_CONFIG_HOME}/argvus/terminal/kitty-tui/kitty.conf" \
-    "${SYSTEM_ROOT}/kitty-tui/kitty.conf"; do
+    "${SYSTEM_ROOT}/config/kitty-tui/kitty.conf"; do
     [ -f "$_file" ] && { printf '%s\n' "$_file"; return 0; }
   done
-  die "Kitty TUI config not found under ${SYSTEM_ROOT}/kitty-tui"
+  die "Kitty TUI config not found under ${SYSTEM_ROOT}/config/kitty-tui"
 }
 
 runtime_base_config() {

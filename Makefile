@@ -19,24 +19,24 @@ install:
 		"$(DESTDIR)$(PREFIX)/bin/argvus-terminal"
 	$(INSTALL) -Dm644 src/usr/share/applications/argvus-terminal.desktop \
 		"$(DESTDIR)$(PREFIX)/share/applications/argvus-terminal.desktop"
-	$(INSTALL) -dm755 "$(DESTDIR)$(PREFIX)/share/argvus-terminal"
-	cp -R --no-preserve=ownership src/usr/share/argvus-terminal/. "$(DESTDIR)$(PREFIX)/share/argvus-terminal/"
+	$(INSTALL) -dm755 "$(DESTDIR)$(PREFIX)/share/argvus/terminal"
+	cp -R --no-preserve=ownership src/usr/share/argvus/terminal/. "$(DESTDIR)$(PREFIX)/share/argvus/terminal/"
 	$(INSTALL) -Dm644 LICENSE \
 		"$(DESTDIR)$(PREFIX)/share/licenses/argvus-terminal/LICENSE"
 
 uninstall:
 	$(RM) "$(DESTDIR)$(PREFIX)/bin/argvus-terminal"
 	$(RM) "$(DESTDIR)$(PREFIX)/share/applications/argvus-terminal.desktop"
-	rm -rf "$(DESTDIR)$(PREFIX)/share/argvus-terminal"
+	rm -rf "$(DESTDIR)$(PREFIX)/share/argvus/terminal"
 	$(RM) "$(DESTDIR)$(PREFIX)/share/licenses/argvus-terminal/LICENSE"
 
 validate:
 	@set -eu; \
 	test -x src/usr/bin/argvus-terminal; \
 	test -f src/usr/share/applications/argvus-terminal.desktop; \
-	test -f src/usr/share/argvus-terminal/kitty/kitty.conf; \
-	test -f src/usr/share/argvus-terminal/kitty-tui/kitty.conf; \
-	for theme in src/usr/share/argvus-terminal/kitty/themes/*/theme.conf; do test -f "$$theme"; done; \
+	test -f src/usr/share/argvus/terminal/config/kitty.conf; \
+	test -f src/usr/share/argvus/terminal/config/kitty-tui/kitty.conf; \
+	for theme in src/usr/share/argvus/terminal/config/themes/*/theme.conf; do test -f "$$theme"; done; \
 	sh -n src/usr/bin/argvus-terminal; \
 	if command -v shellcheck >/dev/null 2>&1; then \
 		shellcheck -e SC1090 -e SC1091 src/usr/bin/argvus-terminal; \
