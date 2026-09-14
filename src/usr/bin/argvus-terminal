@@ -142,7 +142,10 @@ runtime_base_config() {
     -v family="$_family" \
     -v size="${_size}.0" \
     -v accent="$_accent" '
-      /^[[:space:]]*include[[:space:]].*\/kitty\/themes\/.*\/theme\.conf[[:space:]]*$/ { print "include " theme_file; next }
+      # The canonical package path is terminal/config/themes. Keep this
+      # independent of the old Kitty-specific directory name so --apply
+      # really replaces the theme in every generated Kitty profile.
+      /^[[:space:]]*include[[:space:]].*\/themes\/[^[:space:]]+\/theme\.conf[[:space:]]*$/ { print "include " theme_file; next }
       /^[[:space:]]*font_family[[:space:]]+/ { print "font_family      " family; next }
       /^[[:space:]]*font_size[[:space:]]+/ { print "font_size        " size; next }
       { print }
