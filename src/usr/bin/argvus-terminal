@@ -18,20 +18,11 @@ else
   paths_cache() { printf '%s\n' "${ARGVUS_CACHE_HOME}/${1}"; }
 fi
 
-usage() {
-  cat <<'EOF'
-Usage:
-  argvus-terminal [kitty options]
-  argvus-terminal --apply [theme]
-  argvus-terminal --print-config [theme]
-  argvus-terminal --print-tui-config [theme]
+# shellcheck disable=SC1091
+. /usr/share/argvus/lib/i18n.sh
 
-Options:
-  --class <class>              Set Kitty window class.
-  --font-profile <profile>     terminal or apps.
-  --tui                        Use the ARGVUS TUI Kitty profile.
-  -e <command> [args...]       Execute a command in Kitty.
-EOF
+usage() {
+  printf '%s\n' "$(argvus_tr terminal usage)"
 }
 
 die() {
@@ -111,7 +102,7 @@ base_config() {
     "${SYSTEM_ROOT}/config/kitty.conf"; do
     [ -f "$_file" ] && { printf '%s\n' "$_file"; return 0; }
   done
-  die "Kitty config not found under ${SYSTEM_ROOT}/config"
+  die "$(argvus_tr terminal config_not_found path="${SYSTEM_ROOT}/config")"
 }
 
 tui_config() {
@@ -120,7 +111,7 @@ tui_config() {
     "${SYSTEM_ROOT}/config/kitty-tui/kitty.conf"; do
     [ -f "$_file" ] && { printf '%s\n' "$_file"; return 0; }
   done
-  die "Kitty TUI config not found under ${SYSTEM_ROOT}/config/kitty-tui"
+  die "$(argvus_tr terminal tui_config_not_found path="${SYSTEM_ROOT}/config/kitty-tui")"
 }
 
 runtime_base_config() {
@@ -228,7 +219,7 @@ fi
 while [ "$#" -gt 0 ]; do
   case "$1" in
     --class)
-      [ "$#" -ge 2 ] || die "--class requires a value"
+      [ "$#" -ge 2 ] || die "$(argvus_tr terminal class_requires_value)"
       class="$2"
       shift 2
       ;;
@@ -237,7 +228,7 @@ while [ "$#" -gt 0 ]; do
       shift
       ;;
     --font-profile)
-      [ "$#" -ge 2 ] || die "--font-profile requires a value"
+      [ "$#" -ge 2 ] || die "$(argvus_tr terminal font_profile_requires_value)"
       font_profile="$2"
       shift 2
       ;;
@@ -261,10 +252,10 @@ done
 
 case "$font_profile" in
   terminal|apps) ;;
-  *) die "unsupported font profile: $font_profile" ;;
+  *) die "$(argvus_tr terminal unsupported_font_profile profile="$font_profile")" ;;
 esac
 
-command -v kitty >/dev/null 2>&1 || die "kitty is not installed"
+command -v kitty >/dev/null 2>&1 || die "$(argvus_tr terminal kitty_not_installed)"
 
 if [ "$use_tui" -eq 1 ]; then
   config="$(runtime_tui_config "$(read_active_theme)" "$font_profile")"

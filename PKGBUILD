@@ -8,6 +8,7 @@ url="https://github.com/argvus/argvus-terminal"
 license=('GPL-3.0-only')
 depends=(
   'argvus-session'
+  'argvus-i18n'
   'kitty'
 )
 makedepends=()
