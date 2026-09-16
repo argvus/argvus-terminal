@@ -1,59 +1,53 @@
-PREFIX ?= /usr
-DESTDIR ?=
-INSTALL ?= install
-RM ?= rm -f
+.PHONY: help build package install install-package clean validate lint spellcheck changelog
 
 .DEFAULT_GOAL := help
 
-.PHONY: help install uninstall validate build clean
-
 help:
 	@echo "Available targets:"
-	@echo "  make build"
-	@echo "  make install"
-	@echo "  make uninstall"
-	@echo "  make validate"
-
-install:
-	$(INSTALL) -Dm755 src/usr/bin/argvus-terminal \
-		"$(DESTDIR)$(PREFIX)/bin/argvus-terminal"
-	$(INSTALL) -Dm644 src/usr/share/applications/argvus-terminal.desktop \
-		"$(DESTDIR)$(PREFIX)/share/applications/argvus-terminal.desktop"
-	$(INSTALL) -dm755 "$(DESTDIR)$(PREFIX)/share/argvus/terminal"
-	cp -R --no-preserve=ownership src/usr/share/argvus/terminal/. "$(DESTDIR)$(PREFIX)/share/argvus/terminal/"
-	$(INSTALL) -Dm644 LICENSE \
-		"$(DESTDIR)$(PREFIX)/share/licenses/argvus-terminal/LICENSE"
-
-uninstall:
-	$(RM) "$(DESTDIR)$(PREFIX)/bin/argvus-terminal"
-	$(RM) "$(DESTDIR)$(PREFIX)/share/applications/argvus-terminal.desktop"
-	rm -rf "$(DESTDIR)$(PREFIX)/share/argvus/terminal"
-	$(RM) "$(DESTDIR)$(PREFIX)/share/licenses/argvus-terminal/LICENSE"
-
-validate:
-	@set -eu; \
-	test -x src/usr/bin/argvus-terminal; \
-	test -f src/usr/share/applications/argvus-terminal.desktop; \
-	test -f src/usr/share/argvus/terminal/config/kitty.conf; \
-	test -f src/usr/share/argvus/terminal/config/kitty-tui/kitty.conf; \
-	for theme in src/usr/share/argvus/terminal/config/themes/*/theme.conf; do test -f "$$theme"; done; \
-	sh -n src/usr/bin/argvus-terminal; \
-	if command -v shellcheck >/dev/null 2>&1; then \
-		shellcheck -e SC1090 -e SC1091 src/usr/bin/argvus-terminal; \
-	else \
-		echo "shellcheck not found; skipped"; \
-	fi; \
-	if command -v desktop-file-validate >/dev/null 2>&1; then \
-		desktop-file-validate src/usr/share/applications/argvus-terminal.desktop; \
-	else \
-		echo "desktop-file-validate not found; skipped"; \
-	fi; \
-	! find src/usr -path '*/bin/kitty' -o -path '*/applications/kitty.desktop' -o -path '*/etc/xdg/kitty/*' | grep -q .
-	@echo "argvus-terminal validation ok"
+	@echo "  make build           - build the package into build/"
+	@echo "  make package         - alias for make build"
+	@echo "  make install         - install the single local package (sudo pacman -U)"
+	@echo "  make clean           - remove build/ outputs"
+	@echo "  make validate        - run required repository and PKGBUILD checks"
+	@echo "  make lint            - run local static checks"
+	@echo "  make spellcheck      - run cspell (if installed)"
+	@echo "  make changelog       - regenerate CHANGELOG.md with git-cliff"
 
 build:
-	@tools/build-local-package.sh
+	@tools/sh/pkgbuild_local.sh
+
+package: build
+
+install:
+	@set -e; \
+	package="$$(find build/dist -maxdepth 1 -type f -name '*.pkg.tar.zst' -print | sort | head -n 1)"; \
+	count="$$(find build/dist -maxdepth 1 -type f -name '*.pkg.tar.zst' -print | wc -l)"; \
+	if [ "$$count" -ne 1 ] || [ -z "$$package" ]; then \
+		echo "Expected exactly one package in build/dist; run 'make clean && make build'." >&2; \
+		exit 1; \
+	fi; \
+	sudo pacman -U "$$package"
+
+install-package: install
+
+validate:
+	@tools/sh/validate.sh
+
+lint:
+	@shellcheck tools/sh/*.sh packaging/arch/common/*.sh src/usr/bin/argvus-hello
+	@bash -n tools/sh/*.sh packaging/arch/common/*.sh src/usr/bin/argvus-hello
+	@git diff --check
+	@echo "Lint OK"
+
+spellcheck:
+	@if command -v cspell >/dev/null 2>&1; then \
+		cspell --config cspell.json .; \
+	else \
+		echo "cspell is not installed; skipping (CI runs it)." >&2; \
+	fi
+
+changelog:
+	@git-cliff -o CHANGELOG.md
 
 clean:
-	rm -rf dist
-	rm -f *.pkg.tar* packaging/arch/*.zst packaging/arch/*.tar.gz
+	rm -rf -- build/
