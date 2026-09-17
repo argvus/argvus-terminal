@@ -3,6 +3,14 @@
 
 set -eu
 
+# Desktop launchers do not source interactive shell startup files. Keep the
+# standard Arch executable locations available without replacing a user's PATH.
+case ":${PATH:-}:" in
+  *:/usr/bin:*) ;;
+  *) PATH="${PATH:+$PATH:}/usr/bin" ;;
+esac
+export PATH
+
 SYSTEM_ROOT="${ARGVUS_TERMINAL_SYSTEM_CONFIG:-/usr/share/argvus/terminal}"
 DEFAULT_THEME="argvus-dark-aether"
 DEFAULT_ACCENT="#3590bd"
