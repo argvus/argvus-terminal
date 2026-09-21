@@ -42,7 +42,7 @@ read_first_line() {
   _file="$1"
   _fallback="$2"
   if [ -s "$_file" ]; then
-    sed -n '1p' "$_file"
+    sed -n '1{s/\r$//;s/^[[:space:]]*//;s/[[:space:]]*$//;p;}' "$_file"
   else
     printf '%s\n' "$_fallback"
   fi
