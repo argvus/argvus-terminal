@@ -52,14 +52,18 @@ read_active_theme() {
   read_first_line "${ARGVUS_CONFIG_HOME}/argvus/.active-theme" "$DEFAULT_THEME"
 }
 
-effects_enabled() {
-  case "$(read_first_line "${ARGVUS_CONFIG_HOME}/argvus/state/effects" "")" in
+transparency_enabled() {
+  _state="$(read_first_line "${ARGVUS_CONFIG_HOME}/argvus/state/transparency" "")"
+  if [ -z "$_state" ]; then
+    _state="$(read_first_line "${ARGVUS_CONFIG_HOME}/argvus/state/effects" "")"
+  fi
+  case "$_state" in
     enabled) return 0 ;;
     disabled) return 1 ;;
   esac
 
   # Keep the implicit default identical to effects-toggle.sh. In particular,
-  # VMs start with effects disabled even before a user explicitly toggles the
+  # VMs start with transparency disabled even before a user explicitly toggles the
   # setting, so terminal backgrounds must not retain theme transparency.
   [ "${ARGVUS_LOW_POWER:-0}" = 1 ] && return 1
   if command -v systemd-detect-virt >/dev/null 2>&1 \
@@ -152,7 +156,7 @@ runtime_base_config() {
   _size="$(font_size "$_profile")"
   _accent="$(read_accent "$_theme")"
   _effects_opacity="1.0"
-  if effects_enabled; then
+  if transparency_enabled; then
     _effects_opacity=""
   fi
 
@@ -178,7 +182,7 @@ runtime_base_config() {
       END {
         # Theme files are included above and their background_opacity setting
         # takes effect after the base configuration has been parsed. Emit the
-        # disabled-effects override last so Kitty and argvus-terminal always
+        # disabled-transparency override last so Kitty and argvus-terminal always
         # get an opaque surface.
         if (opacity != "") print "background_opacity " opacity
         print ""
