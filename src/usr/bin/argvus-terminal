@@ -172,7 +172,8 @@ runtime_base_config() {
   fi
 
   mkdir -p "${_dst%/*}"
-  awk \
+  _tmp="$(mktemp "${_dst}.XXXXXX")" || die "$(argvus_tr terminal cache_create_failed path="${_dst}")"
+  if ! awk \
     -v theme_file="$_theme_file" \
     -v family="$_family" \
     -v size="${_size}.0" \
@@ -200,7 +201,15 @@ runtime_base_config() {
         print "# Runtime ARGVUS accent override"
         print "active_tab_foreground   " accent
       }
-    ' "$_src" > "$_dst"
+    ' "$_src" > "$_tmp"; then
+    rm -f -- "$_tmp"
+    die "$(argvus_tr terminal cache_write_failed path="${_dst}")"
+  fi
+  [ -s "$_tmp" ] || {
+    rm -f -- "$_tmp"
+    die "$(argvus_tr terminal cache_write_failed path="${_dst}")"
+  }
+  mv -f -- "$_tmp" "$_dst"
   printf '%s\n' "$_dst"
 }
 
@@ -217,7 +226,8 @@ runtime_tui_config() {
   _size="$(font_size "$_profile")"
 
   mkdir -p "${_dst%/*}"
-  awk \
+  _tmp="$(mktemp "${_dst}.XXXXXX")" || die "$(argvus_tr terminal cache_create_failed path="${_dst}")"
+  if ! awk \
     -v base="$_base" \
     -v family="$_family" \
     -v size="${_size}.0" '
@@ -225,8 +235,30 @@ runtime_tui_config() {
       /^[[:space:]]*font_family[[:space:]]+/ { print "font_family      " family; next }
       /^[[:space:]]*font_size[[:space:]]+/ { print "font_size        " size; next }
       { print }
-    ' "$_src" > "$_dst"
+    ' "$_src" > "$_tmp"; then
+    rm -f -- "$_tmp"
+    die "$(argvus_tr terminal cache_write_failed path="${_dst}")"
+  fi
+  [ -s "$_tmp" ] || {
+    rm -f -- "$_tmp"
+    die "$(argvus_tr terminal cache_write_failed path="${_dst}")"
+  }
+  mv -f -- "$_tmp" "$_dst"
   printf '%s\n' "$_dst"
+}
+
+cache_lock_acquire() {
+  _lock="$(paths_cache argvus-terminal.lock)"
+  mkdir -p "${_lock%/*}"
+  # Serialize --apply with normal terminal launches. Kitty never inherits
+  # the descriptor because it is released before exec.
+  exec 9>"$_lock"
+  flock --exclusive 9 || die "$(argvus_tr terminal cache_lock_failed path="${_lock}")"
+}
+
+cache_lock_release() {
+  flock --unlock 9 2>/dev/null || true
+  exec 9>&-
 }
 
 mode="launch"
@@ -259,19 +291,25 @@ esac
 
 if [ "$mode" = "apply" ]; then
   theme="${theme:-$(read_active_theme)}"
+  cache_lock_acquire
   runtime_base_config "$theme" terminal >/dev/null
   runtime_tui_config "$theme" terminal >/dev/null
   runtime_tui_config "$theme" apps >/dev/null
+  cache_lock_release
   exit 0
 fi
 
 if [ "$mode" = "print-config" ]; then
+  cache_lock_acquire
   runtime_base_config "${theme:-$(read_active_theme)}" "$font_profile"
+  cache_lock_release
   exit 0
 fi
 
 if [ "$mode" = "print-tui-config" ]; then
+  cache_lock_acquire
   runtime_tui_config "${theme:-$(read_active_theme)}" "$font_profile"
+  cache_lock_release
   exit 0
 fi
 
@@ -317,9 +355,12 @@ esac
 command -v kitty >/dev/null 2>&1 || die "$(argvus_tr terminal kitty_not_installed)"
 
 if [ "$use_tui" -eq 1 ]; then
+  cache_lock_acquire
   config="$(runtime_tui_config "$(read_active_theme)" "$font_profile")"
 else
+  cache_lock_acquire
   config="$(runtime_base_config "$(read_active_theme)" "$font_profile")"
 fi
 
+cache_lock_release
 exec kitty --class "$class" --config "$config" "$@"

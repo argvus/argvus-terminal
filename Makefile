@@ -1,4 +1,4 @@
-.PHONY: help build package install install-package clean validate lint lint-shell spellcheck changelog
+.PHONY: help build package install install-package clean validate test lint lint-shell spellcheck changelog
 
 .DEFAULT_GOAL := help
 
@@ -9,6 +9,7 @@ help:
 	@echo "  make install         - install the single local package (sudo pacman -U)"
 	@echo "  make clean           - remove build/ outputs"
 	@echo "  make validate        - run required repository and PKGBUILD checks"
+	@echo "  make test            - exercise concurrent runtime cache generation"
 	@echo "  make lint            - run local static checks"
 	@echo "  make spellcheck      - run cspell (if installed)"
 	@echo "  make changelog       - regenerate CHANGELOG.md with git-cliff"
@@ -32,6 +33,9 @@ install-package: install
 
 validate:
 	@tools/sh/validate.sh
+
+test:
+	@tools/test-runtime.sh
 
 lint-shell:
 	@for root in tools packaging/arch/common src; do \
