@@ -83,6 +83,7 @@ theme_default_accent() {
     argvus-github-light|argvus-github-light-float) printf '#0969DA\n' ;;
     argvus-light-solarized|argvus-light-solarized-float) printf '#268BD2\n' ;;
     argvus-light-frost|argvus-light-frost-float) printf '#0969DA\n' ;;
+    argvus-light-gruvbox|argvus-light-gruvbox-float) printf '#458588\n' ;;
     argvus-dark-slate|argvus-dark-slate-float) printf '#7391a5\n' ;;
     argvus-dark-universe|argvus-dark-universe-float) printf '#eeeeee\n' ;;
     argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float) printf '#D79921\n' ;;
