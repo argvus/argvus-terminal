@@ -92,6 +92,7 @@ theme_default_accent() {
     argvus-dark-solitude|argvus-dark-solitude-float) printf '#798186\n' ;;
     argvus-dark-sunset|argvus-dark-sunset-float) printf '#E2BE8A\n' ;;
     argvus-dark-hackerman|argvus-dark-hackerman-float) printf '#82FB9C\n' ;;
+    argvus-dark-monokai|argvus-dark-monokai-float) printf '#78DCE8\n' ;;
     *) printf '%s\n' "$DEFAULT_ACCENT" ;;
   esac
 }
