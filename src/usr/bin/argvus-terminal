@@ -76,15 +76,19 @@ transparency_enabled() {
 theme_default_accent() {
   case "$1" in
     argvus-onedark|argvus-onedark-float) printf '#61AFEF\n' ;;
-    argvus-dracula|argvus-dracula-float) printf '#BD93F9\n' ;;
+    argvus-dark-dracula|argvus-dark-dracula-float) printf '#BD93F9\n' ;;
     argvus-dark-aether|argvus-dark-aether-float) printf '#3590bd\n' ;;
     argvus-dark-silver|argvus-dark-silver-float) printf '#595959\n' ;;
     argvus-light-veil|argvus-light-veil-float) printf '#181818\n' ;;
-    argvus-frost|argvus-frost-float) printf '#0969DA\n' ;;
+    argvus-github-light|argvus-github-light-float) printf '#0969DA\n' ;;
+    argvus-light-solarized|argvus-light-solarized-float) printf '#268BD2\n' ;;
+    argvus-light-frost|argvus-light-frost-float) printf '#0969DA\n' ;;
     argvus-dark-slate|argvus-dark-slate-float) printf '#7391a5\n' ;;
     argvus-dark-universe|argvus-dark-universe-float) printf '#eeeeee\n' ;;
-    argvus-gruvbox-dark-medium|argvus-gruvbox-dark-medium-float) printf '#D79921\n' ;;
-    argvus-tokyo-night|argvus-tokyo-night-float) printf '#7AA2F7\n' ;;
+    argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float) printf '#D79921\n' ;;
+    argvus-dark-gruvbox|argvus-dark-gruvbox-float) printf '#D4BE98\n' ;;
+    argvus-dark-tokio-night|argvus-dark-tokio-night-float) printf '#7AA2F7\n' ;;
+    argvus-dark-solitude|argvus-dark-solitude-float) printf '#798186\n' ;;
     *) printf '%s\n' "$DEFAULT_ACCENT" ;;
   esac
 }
