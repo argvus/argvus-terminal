@@ -81,6 +81,8 @@ theme_default_accent() {
     silver-dark|silver-dark-float) printf '#595959\n' ;;
     argvus-light|argvus-light-float) printf '#181818\n' ;;
     github-light|github-light-float) printf '#0969DA\n' ;;
+    one-light|one-light-float) printf '#4078F2\n' ;;
+    everforest-light|everforest-light-float) printf '#3A94C5\n' ;;
     solarized-light|solarized-light-float) printf '#268BD2\n' ;;
     frost|frost-float) printf '#0969DA\n' ;;
     gruvbox-light|gruvbox-light-float) printf '#458588\n' ;;
