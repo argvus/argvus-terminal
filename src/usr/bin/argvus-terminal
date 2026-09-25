@@ -12,7 +12,7 @@ esac
 export PATH
 
 SYSTEM_ROOT="${ARGVUS_TERMINAL_SYSTEM_CONFIG:-/usr/share/argvus/terminal}"
-DEFAULT_THEME="argvus-dark-aether"
+DEFAULT_THEME="argvus-dark"
 DEFAULT_ACCENT="#3590bd"
 
 ARGVUS_BOOTSTRAP="${ARGVUS_BOOTSTRAP:-${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/session/sh/bootstrap.sh}"
@@ -75,24 +75,24 @@ transparency_enabled() {
 
 theme_default_accent() {
   case "$1" in
-    argvus-onedark|argvus-onedark-float) printf '#61AFEF\n' ;;
-    argvus-dark-dracula|argvus-dark-dracula-float) printf '#BD93F9\n' ;;
-    argvus-dark-aether|argvus-dark-aether-float) printf '#3590bd\n' ;;
-    argvus-dark-silver|argvus-dark-silver-float) printf '#595959\n' ;;
-    argvus-light-veil|argvus-light-veil-float) printf '#181818\n' ;;
-    argvus-github-light|argvus-github-light-float) printf '#0969DA\n' ;;
-    argvus-light-solarized|argvus-light-solarized-float) printf '#268BD2\n' ;;
-    argvus-light-frost|argvus-light-frost-float) printf '#0969DA\n' ;;
-    argvus-light-gruvbox|argvus-light-gruvbox-float) printf '#458588\n' ;;
-    argvus-dark-slate|argvus-dark-slate-float) printf '#7391a5\n' ;;
-    argvus-dark-universe|argvus-dark-universe-float) printf '#eeeeee\n' ;;
-    argvus-dark-gruvbox-high|argvus-dark-gruvbox-high-float) printf '#D79921\n' ;;
-    argvus-dark-gruvbox|argvus-dark-gruvbox-float) printf '#D4BE98\n' ;;
-    argvus-dark-tokio-night|argvus-dark-tokio-night-float) printf '#7AA2F7\n' ;;
-    argvus-dark-solitude|argvus-dark-solitude-float) printf '#798186\n' ;;
-    argvus-dark-sunset|argvus-dark-sunset-float) printf '#E2BE8A\n' ;;
-    argvus-dark-hackerman|argvus-dark-hackerman-float) printf '#82FB9C\n' ;;
-    argvus-dark-monokai|argvus-dark-monokai-float) printf '#78DCE8\n' ;;
+    one-dark|one-dark-float) printf '#61AFEF\n' ;;
+    dracula|dracula-float) printf '#BD93F9\n' ;;
+    argvus-dark|argvus-dark-float) printf '#3590bd\n' ;;
+    silver-dark|silver-dark-float) printf '#595959\n' ;;
+    argvus-light|argvus-light-float) printf '#181818\n' ;;
+    github-light|github-light-float) printf '#0969DA\n' ;;
+    solarized-light|solarized-light-float) printf '#268BD2\n' ;;
+    frost|frost-float) printf '#0969DA\n' ;;
+    gruvbox-light|gruvbox-light-float) printf '#458588\n' ;;
+    slate-dark|slate-dark-float) printf '#7391a5\n' ;;
+    universe|universe-float) printf '#eeeeee\n' ;;
+    gruvbox-high-dark|gruvbox-high-dark-float) printf '#D79921\n' ;;
+    gruvbox-dark|gruvbox-dark-float) printf '#D4BE98\n' ;;
+    tokyo-night|tokyo-night-float) printf '#7AA2F7\n' ;;
+    solitude|solitude-float) printf '#798186\n' ;;
+    sunset|sunset-float) printf '#E2BE8A\n' ;;
+    hackerman|hackerman-float) printf '#82FB9C\n' ;;
+    monokai-dark|monokai-dark-float) printf '#78DCE8\n' ;;
     *) printf '%s\n' "$DEFAULT_ACCENT" ;;
   esac
 }
