@@ -49,13 +49,13 @@ read_first_line() {
 }
 
 read_active_theme() {
-  read_first_line "${ARGVUS_CONFIG_HOME}/argvus/.active-theme" "$DEFAULT_THEME"
+  read_first_line "${ARGVUS_CONFIG_HOME}/argvus/data/.active-theme" "$DEFAULT_THEME"
 }
 
 transparency_enabled() {
-  _state="$(read_first_line "${ARGVUS_CONFIG_HOME}/argvus/state/transparency" "")"
+  _state="$(read_first_line "${ARGVUS_CONFIG_HOME}/argvus/data/state/transparency" "")"
   if [ -z "$_state" ]; then
-    _state="$(read_first_line "${ARGVUS_CONFIG_HOME}/argvus/state/effects" "")"
+    _state="$(read_first_line "${ARGVUS_CONFIG_HOME}/argvus/data/state/effects" "")"
   fi
   case "$_state" in
     enabled) return 0 ;;
@@ -73,28 +73,59 @@ transparency_enabled() {
   return 0
 }
 
+terminal_opacity() {
+  if command -v argvus-config >/dev/null 2>&1; then
+    _enabled="$(argvus-config get /effects/transparency_terminal_enabled --effective --raw 2>/dev/null || true)"
+    _value="$(argvus-config get /effects/transparency_terminal_value --effective --raw 2>/dev/null || true)"
+    case "$_enabled:$_value" in
+      true:[0-9]*|false:[0-9]*)
+        if [ "$_enabled" = true ]; then
+          awk -v transparency="$_value" 'BEGIN { printf "%.2f\n", 1 - (transparency / 100) }'
+        else
+          printf '1.0\n'
+        fi
+        return 0
+        ;;
+    esac
+  fi
+  if transparency_enabled; then
+    printf '\n'
+  else
+    printf '1.0\n'
+  fi
+}
+
 theme_default_accent() {
-  case "$1" in
-    one-dark|one-dark-float) printf '#61AFEF\n' ;;
-    dracula|dracula-float) printf '#BD93F9\n' ;;
-    argvus-dark|argvus-dark-float) printf '#3590bd\n' ;;
-    silver-dark|silver-dark-float) printf '#595959\n' ;;
-    argvus-light|argvus-light-float) printf '#181818\n' ;;
-    github-light|github-light-float) printf '#0969DA\n' ;;
-    one-light|one-light-float) printf '#4078F2\n' ;;
-    everforest-light|everforest-light-float) printf '#3A94C5\n' ;;
-    solarized-light|solarized-light-float) printf '#268BD2\n' ;;
-    frost|frost-float) printf '#0969DA\n' ;;
-    gruvbox-light|gruvbox-light-float) printf '#458588\n' ;;
-    slate-dark|slate-dark-float) printf '#7391a5\n' ;;
-    universe|universe-float) printf '#eeeeee\n' ;;
-    gruvbox-high-dark|gruvbox-high-dark-float) printf '#D79921\n' ;;
-    gruvbox-dark|gruvbox-dark-float) printf '#D4BE98\n' ;;
-    tokyo-night|tokyo-night-float) printf '#7AA2F7\n' ;;
-    solitude|solitude-float) printf '#798186\n' ;;
-    sunset|sunset-float) printf '#E2BE8A\n' ;;
-    hackerman|hackerman-float) printf '#82FB9C\n' ;;
-    monokai-dark|monokai-dark-float) printf '#78DCE8\n' ;;
+  _theme_id="${1%-float}"
+
+  # Try CLI first (argvus-appearance themes get <id> accent)
+  if command -v argvus-appearance >/dev/null 2>&1; then
+    _cli_accent="$(argvus-appearance themes get "$_theme_id" accent 2>/dev/null || true)"
+    [ -n "$_cli_accent" ] && printf '%s\n' "$_cli_accent" && return 0
+  fi
+
+  # Fallback: hardcoded map for backwards compatibility
+  case "$_theme_id" in
+    one-dark) printf '#61AFEF\n' ;;
+    dracula) printf '#BD93F9\n' ;;
+    argvus-dark) printf '#3590bd\n' ;;
+    silver-dark) printf '#595959\n' ;;
+    argvus-light) printf '#181818\n' ;;
+    github-light) printf '#0969DA\n' ;;
+    one-light) printf '#4078F2\n' ;;
+    everforest-light) printf '#3A94C5\n' ;;
+    solarized-light) printf '#268BD2\n' ;;
+    frost) printf '#0969DA\n' ;;
+    gruvbox-light) printf '#458588\n' ;;
+    slate-dark) printf '#7391a5\n' ;;
+    universe) printf '#eeeeee\n' ;;
+    gruvbox-high-dark) printf '#D79921\n' ;;
+    gruvbox-dark) printf '#D4BE98\n' ;;
+    tokyo-night) printf '#7AA2F7\n' ;;
+    solitude) printf '#798186\n' ;;
+    sunset) printf '#E2BE8A\n' ;;
+    hackerman) printf '#82FB9C\n' ;;
+    monokai-dark) printf '#78DCE8\n' ;;
     *) printf '%s\n' "$DEFAULT_ACCENT" ;;
   esac
 }
@@ -102,13 +133,13 @@ theme_default_accent() {
 read_accent() {
   _theme="$1"
   _fallback="$(theme_default_accent "$_theme")"
-  read_first_line "${ARGVUS_CONFIG_HOME}/argvus/.accent-color" "$_fallback"
+  read_first_line "${ARGVUS_CONFIG_HOME}/argvus/data/.accent-color" "$_fallback"
 }
 
 font_state_value() {
   _key="$1"
   _fallback="$2"
-  _fonts_file="${ARGVUS_CONFIG_HOME}/argvus/fonts.conf"
+  _fonts_file="${ARGVUS_CONFIG_HOME}/argvus/data/generated/fonts.conf"
   if [ -f "$_fonts_file" ]; then
     _value="$(sed -n "s|^${_key}=||p" "$_fonts_file" | head -n1)"
     [ -n "$_value" ] && { printf '%s\n' "$_value"; return 0; }
@@ -133,7 +164,7 @@ font_size() {
 theme_file() {
   _theme="$1"
   for _file in \
-    "${ARGVUS_CONFIG_HOME}/argvus/terminal/kitty/themes/${_theme}/theme.conf" \
+    "${ARGVUS_CONFIG_HOME}/argvus/data/terminal/kitty/themes/${_theme}/theme.conf" \
     "${SYSTEM_ROOT}/config/themes/${_theme}/theme.conf"; do
     [ -f "$_file" ] && { printf '%s\n' "$_file"; return 0; }
   done
@@ -142,7 +173,7 @@ theme_file() {
 
 base_config() {
   for _file in \
-    "${ARGVUS_CONFIG_HOME}/argvus/terminal/kitty/kitty.conf" \
+    "${ARGVUS_CONFIG_HOME}/argvus/data/terminal/kitty/kitty.conf" \
     "${SYSTEM_ROOT}/config/kitty.conf"; do
     [ -f "$_file" ] && { printf '%s\n' "$_file"; return 0; }
   done
@@ -151,7 +182,7 @@ base_config() {
 
 tui_config() {
   for _file in \
-    "${ARGVUS_CONFIG_HOME}/argvus/terminal/kitty-tui/kitty.conf" \
+    "${ARGVUS_CONFIG_HOME}/argvus/data/terminal/kitty-tui/kitty.conf" \
     "${SYSTEM_ROOT}/config/kitty-tui/kitty.conf"; do
     [ -f "$_file" ] && { printf '%s\n' "$_file"; return 0; }
   done
@@ -170,10 +201,7 @@ runtime_base_config() {
   _family="$(font_family "$_profile")"
   _size="$(font_size "$_profile")"
   _accent="$(read_accent "$_theme")"
-  _effects_opacity="1.0"
-  if transparency_enabled; then
-    _effects_opacity=""
-  fi
+  _effects_opacity="$(terminal_opacity)"
 
   mkdir -p "${_dst%/*}"
   _tmp="$(mktemp "${_dst}.XXXXXX")" || die "$(argvus_tr terminal cache_create_failed path="${_dst}")"
@@ -257,7 +285,10 @@ cache_lock_acquire() {
   # Serialize --apply with normal terminal launches. Kitty never inherits
   # the descriptor because it is released before exec.
   exec 9>"$_lock"
-  flock --exclusive 9 || die "$(argvus_tr terminal cache_lock_failed path="${_lock}")"
+  # A theme switch may regenerate Kitty profiles while a launcher is starting.
+  # Bound the wait so a stale writer cannot make all terminal shortcuts appear
+  # dead until the next login.
+  flock --exclusive --timeout 10 9 || die "$(argvus_tr terminal cache_lock_failed path="${_lock}")"
 }
 
 cache_lock_release() {

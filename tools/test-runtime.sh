@@ -11,7 +11,7 @@ trap 'rm -rf -- "$TEST_ROOT"' EXIT
 CONFIG_HOME="$TEST_ROOT/config"
 CACHE_HOME="$TEST_ROOT/cache"
 BIN_DIR="$TEST_ROOT/bin"
-mkdir -p "$CONFIG_HOME/argvus" "$CACHE_HOME/argvus" "$BIN_DIR"
+mkdir -p "$CONFIG_HOME/argvus/data" "$CACHE_HOME/argvus" "$BIN_DIR"
 
 cat > "$TEST_ROOT/bootstrap.sh" <<EOF
 ARGVUS_CONFIG_HOME="$CONFIG_HOME"
@@ -38,7 +38,7 @@ grep -q '^active_tab_foreground ' "$config"
 EOF
 chmod +x "$BIN_DIR/kitty"
 
-printf '%s\n' argvus-dark > "$CONFIG_HOME/argvus/.active-theme"
+printf '%s\n' argvus-dark > "$CONFIG_HOME/argvus/data/.active-theme"
 export ARGVUS_BOOTSTRAP="$TEST_ROOT/bootstrap.sh"
 export ARGVUS_TERMINAL_SYSTEM_CONFIG="$SYSTEM_ROOT"
 export PATH="$BIN_DIR:/usr/bin:/bin"
