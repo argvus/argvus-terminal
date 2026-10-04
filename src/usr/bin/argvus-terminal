@@ -104,6 +104,11 @@ theme_default_accent() {
     [ -n "$_cli_accent" ] && printf '%s\n' "$_cli_accent" && return 0
   fi
 
+  # Drop-in themes declare their accent in the installed manifest; read it
+  # before falling back to the built-in table (top-level keys only).
+  _manifest_accent="$(sed -n -e '/^\[/q' -e 's/^accent = "\(#[0-9A-Fa-f]\{6\}\)".*/\1/p' "${ARGVUS_SYSTEM_CONFIG:-/usr/share/argvus}/appearance/themes.d/${_theme_id}/theme.toml" 2>/dev/null | head -n 1)"
+  [ -n "$_manifest_accent" ] && printf '%s\n' "$_manifest_accent" && return 0
+
   # Fallback: hardcoded map for backwards compatibility
   case "$_theme_id" in
     one-dark) printf '#61AFEF\n' ;;
