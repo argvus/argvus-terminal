@@ -36,6 +36,13 @@ atualização por reload da configuração.
 transparente. O blur usa o raio suportado pelo Kitty e só produz efeito quando
 a janela tem transparência.
 
+## Aviso de comando longo
+
+Comandos que rodam por 30 segundos ou mais avisam quando terminam, desde que a
+janela do terminal esteja sem foco. O aviso usa `notify_on_cmd_finish` do Kitty
+com a integração de shell já ativa, então não é preciso alterar `~/.zshrc` ou
+`~/.bashrc`. O limite de 30 segundos é fixo na configuração do Kitty.
+
 ## Modo App para TUI
 
 O Control Center e os popups TUI da Taskbar usam `argvus-tui-terminal` com um

@@ -37,6 +37,14 @@ updated configuration through a reload.
 transparent. Blur uses Kitty's supported background-blur radius and only has a
 visible effect when the window is transparent.
 
+## Long-running command notification
+
+Commands that run for 30 seconds or more send a notification when they finish,
+as long as the terminal window is unfocused. The notification uses Kitty's
+`notify_on_cmd_finish` with the shell integration that is already enabled, so
+`~/.zshrc` and `~/.bashrc` do not need changes. The 30-second threshold is fixed
+in the Kitty configuration.
+
 ## TUI App Mode
 
 ARGVUS Control Center and taskbar TUI popups use `argvus-tui-terminal` with a
