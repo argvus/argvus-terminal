@@ -129,7 +129,7 @@ theme_default_accent() {
     tokyo-night) printf '#7AA2F7\n' ;;
     solitude) printf '#798186\n' ;;
     sunset) printf '#E2BE8A\n' ;;
-    hackerman) printf '#82FB9C\n' ;;
+    matrix) printf '#82FB9C\n' ;;
     monokai-dark) printf '#78DCE8\n' ;;
     *) printf '%s\n' "$DEFAULT_ACCENT" ;;
   esac
