@@ -44,7 +44,7 @@ arch_package_argvus_terminal_payload() {
 	local source_root="${srcdir}/${pkgname}-${pkgver}"
 
 	install -Dm755 "${source_root}/src/usr/bin/argvus-terminal" \
-		"${pkgdir}/usr/bin/argvus-terminal"
+		"${pkgdir}/usr/lib/argvus/commands/argvus-terminal"
 	install -Dm644 "${source_root}/src/usr/share/applications/argvus-terminal.desktop" \
 		"${pkgdir}/usr/share/applications/argvus-terminal.desktop"
 	install -dm755 "${pkgdir}/usr/share/argvus/terminal"

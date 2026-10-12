@@ -6,7 +6,7 @@ Kitty terminal integration and ARGVUS configuration layer.
 [![Release](https://github.com/argvus/argvus-terminal/actions/workflows/release.yml/badge.svg)](https://github.com/argvus/argvus-terminal/actions/workflows/release.yml)
 [![License](https://img.shields.io/badge/License-GPL--3.0-blue.svg)](LICENSE)
 
-This repository builds the `argvus-terminal` Arch Linux package. It provides
+This repository builds the `argvus terminal` Arch Linux package. It provides
 the ARGVUS Kitty launcher and its configuration, themes, desktop entry, and
 localized documentation.
 

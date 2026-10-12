@@ -15,9 +15,9 @@ O `argvus-config` projeta o tema em `data/generated/terminal/`, e `argvus --yazi
 As trocas de tema regeneram os arquivos derivados do Kitty em `$XDG_CACHE_HOME/argvus/argvus-terminal`. O gerador serializa as atualizações e substitui cada arquivo atomicamente. Se o terminal ainda não abrir, confira o tema ativo e regenere o cache com:
 
 ```sh
-argvus-config get /appearance/theme --raw
-argvus-terminal --apply
-argvus-terminal --print-config
+argvus config get /appearance/theme --raw
+argvus terminal --apply
+argvus terminal --print-config
 ```
 
 O terminal lê primeiro o tema e o acento gerenciados em
@@ -45,7 +45,7 @@ com a integração de shell já ativa, então não é preciso alterar `~/.zshrc`
 
 ## Modo App para TUI
 
-O Control Center e os popups TUI da Taskbar usam `argvus-tui-terminal` com um
+O Control Center e os popups TUI da Taskbar usam `argvus tui-terminal` com um
 perfil dedicado do Kitty. Ele herda o tema e a fonte ativos do ARGVUS, oculta
 as abas, atribui uma classe estável à janela e encerra com o processo filho,
 sem abrir um shell. O Control Center possui valores independentes de

@@ -16,9 +16,9 @@ argvus --terminal
 Theme changes regenerate Kitty's derived files under `$XDG_CACHE_HOME/argvus/argvus-terminal`. The generator serializes updates and replaces each file atomically. If the terminal still does not open, inspect the active theme and regenerate the cache with:
 
 ```sh
-argvus-config get /appearance/theme --raw
-argvus-terminal --apply
-argvus-terminal --print-config
+argvus config get /appearance/theme --raw
+argvus terminal --apply
+argvus terminal --print-config
 ```
 
 The terminal reads the managed theme and accent from
@@ -47,7 +47,7 @@ in the Kitty configuration.
 
 ## TUI App Mode
 
-ARGVUS Control Center and taskbar TUI popups use `argvus-tui-terminal` with a
+ARGVUS Control Center and taskbar TUI popups use `argvus tui-terminal` with a
 dedicated Kitty app profile. It inherits the active ARGVUS theme and font,
 hides tabs, assigns a stable window class, and exits with its child instead of
 opening a shell. Control Center has independent Transparency and Blur values;

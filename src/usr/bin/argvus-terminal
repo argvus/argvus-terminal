@@ -74,9 +74,9 @@ transparency_enabled() {
 }
 
 terminal_opacity() {
-  if command -v argvus-config >/dev/null 2>&1; then
-    _enabled="$(argvus-config get /effects/transparency_terminal_enabled --effective --raw 2>/dev/null || true)"
-    _value="$(argvus-config get /effects/transparency_terminal_value --effective --raw 2>/dev/null || true)"
+  if command -v argvus >/dev/null 2>&1; then
+    _enabled="$(argvus config get /effects/transparency_terminal_enabled --effective --raw 2>/dev/null || true)"
+    _value="$(argvus config get /effects/transparency_terminal_value --effective --raw 2>/dev/null || true)"
     case "$_enabled:$_value" in
       true:[0-9]*|false:[0-9]*)
         if [ "$_enabled" = true ]; then
