@@ -53,13 +53,11 @@ read_active_theme() {
 }
 
 transparency_enabled() {
-  _state="$(read_first_line "${ARGVUS_CONFIG_HOME}/argvus/data/state/transparency" "")"
-  if [ -z "$_state" ]; then
-    _state="$(read_first_line "${ARGVUS_CONFIG_HOME}/argvus/data/state/effects" "")"
-  fi
+  # The terminal switch is the canonical /effects/transparency_terminal_enabled.
+  _state="$(argvus config get /effects/transparency_terminal_enabled --effective --raw 2>/dev/null || true)"
   case "$_state" in
-    enabled) return 0 ;;
-    disabled) return 1 ;;
+    true|enabled) return 0 ;;
+    false|disabled) return 1 ;;
   esac
 
   # Keep the implicit default identical to effects-toggle.sh. In particular,
